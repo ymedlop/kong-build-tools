@@ -101,7 +101,7 @@ pipeline {
                 }
             }
         }
-        stage('Test Builds') {
+        stage('Test Release') {
             parallel {
                 stage('RedHat Builds'){
                     agent {
@@ -203,6 +203,31 @@ pipeline {
                         always {
                             sh 'make cleanup-build'
                         }
+                    }
+                }
+                stage('Other Releases') {
+                    agent {
+                        node {
+                            label 'docker-compose'
+                        }
+                    }
+                    environment {
+                        KONG_SOURCE = "master"
+                        KONG_SOURCE_LOCATION = "/tmp/kong"
+                        DOCKERHUB = credentials('dockerhub')
+                        DOCKER_USERNAME = "${env.DOCKERHUB_USR}"
+                        DOCKER_PASSWORD = "${env.DOCKERHUB_PSW}"
+                        PATH = "/home/ubuntu/bin/:${env.PATH}"
+                    }
+                    steps {
+                        sh 'make setup-kong-build-tools'
+                        sh 'mkdir -p $HOME/bin'
+                        sh 'sudo ln -s $HOME/bin/kubectl /usr/local/bin/kubectl'
+                        sh 'sudo ln -s $HOME/bin/kind /usr/local/bin/kind'
+                        dir('../kong-build-tools'){ sh 'make setup-ci' }
+                        sh 'PACKAGE_TYPE=src RESTY_IMAGE_BASE=src make release'
+                        sh 'PACKAGE_TYPE=apk RESTY_IMAGE_BASE=alpine RESTY_IMAGE_TAG=1 make release'
+                        sh 'PACKAGE_TYPE=rpm RESTY_IMAGE_BASE=amazonlinux RESTY_IMAGE_TAG=1 make release'
                     }
                 }
             }
