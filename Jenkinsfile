@@ -12,7 +12,6 @@ pipeline {
                 }
             }
             steps {
-                sh 'echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin || true'
                 sh 'git clone --single-branch --branch ${KONG_SOURCE} https://github.com/Kong/kong.git ${KONG_SOURCE_LOCATION}'
                 sh 'make kong-test-container'
             }
@@ -30,7 +29,6 @@ pipeline {
                         TEST_SUITE = "pdk"
                     }
                     steps {
-                        sh 'echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin || true'
                         sh 'git clone --single-branch --branch ${KONG_SOURCE} https://github.com/Kong/kong.git ${KONG_SOURCE_LOCATION}'
                         sh 'make test-kong'
                     }
@@ -46,7 +44,6 @@ pipeline {
                         TEST_SUITE = "integration"
                     }
                     steps {
-                        sh 'echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin || true'
                         sh 'git clone --single-branch --branch ${KONG_SOURCE} https://github.com/Kong/kong.git ${KONG_SOURCE_LOCATION}'
                         sh 'make test-kong'
                     }
@@ -62,7 +59,6 @@ pipeline {
                         TEST_SUITE = "plugins"
                     }
                     steps {
-                        sh 'echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin || true'
                         sh 'git clone --single-branch --branch ${KONG_SOURCE} https://github.com/Kong/kong.git ${KONG_SOURCE_LOCATION}'
                         sh 'make test-kong'
                     }
@@ -78,7 +74,6 @@ pipeline {
                         TEST_SUITE = "integration"
                     }
                     steps {
-                        sh 'echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin || true'
                         sh 'git clone --single-branch --branch ${KONG_SOURCE} https://github.com/Kong/kong.git ${KONG_SOURCE_LOCATION}'
                         sh 'make test-kong'
                     }
@@ -94,7 +89,6 @@ pipeline {
                         TEST_SUITE = "plugins"
                     }
                     steps {
-                        sh 'echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin || true'
                         sh 'git clone --single-branch --branch ${KONG_SOURCE} https://github.com/Kong/kong.git ${KONG_SOURCE_LOCATION}'
                         sh 'make test-kong'
                     }
@@ -112,9 +106,6 @@ pipeline {
                     environment {
                         PACKAGE_TYPE = "rpm"
                         RESTY_IMAGE_BASE = "rhel"
-                        DOCKERHUB = credentials('dockerhub')
-                        DOCKER_USERNAME = "${env.DOCKERHUB_USR}"
-                        DOCKER_PASSWORD = "${env.DOCKERHUB_PSW}"
                         PATH = "/home/ubuntu/bin/:${env.PATH}"
                     }
                     steps {
@@ -134,9 +125,6 @@ pipeline {
                     environment {
                         PACKAGE_TYPE = "rpm"
                         RESTY_IMAGE_BASE = "centos"
-                        DOCKERHUB = credentials('dockerhub')
-                        DOCKER_USERNAME = "${env.DOCKERHUB_USR}"
-                        DOCKER_PASSWORD = "${env.DOCKERHUB_PSW}"
                         PATH = "/home/ubuntu/bin/:${env.PATH}"
                     }
                     steps {
@@ -157,9 +145,6 @@ pipeline {
                     environment {
                         PACKAGE_TYPE = "deb"
                         RESTY_IMAGE_BASE = "debian"
-                        DOCKERHUB = credentials('dockerhub')
-                        DOCKER_USERNAME = "${env.DOCKERHUB_USR}"
-                        DOCKER_PASSWORD = "${env.DOCKERHUB_PSW}"
                         PATH = "/home/ubuntu/bin/:${env.PATH}"
                     }
                     steps {
@@ -184,9 +169,6 @@ pipeline {
                     environment {
                         PACKAGE_TYPE = "deb"
                         RESTY_IMAGE_BASE = "ubuntu"
-                        DOCKERHUB = credentials('dockerhub')
-                        DOCKER_USERNAME = "${env.DOCKERHUB_USR}"
-                        DOCKER_PASSWORD = "${env.DOCKERHUB_PSW}"
                         PATH = "/home/ubuntu/bin/:${env.PATH}"
                         USER = 'travis'
                         AWS_ACCESS_KEY = credentials('AWS_ACCESS_KEY')
@@ -212,11 +194,6 @@ pipeline {
                         }
                     }
                     environment {
-                        KONG_SOURCE = "master"
-                        KONG_SOURCE_LOCATION = "/tmp/kong"
-                        DOCKERHUB = credentials('dockerhub')
-                        DOCKER_USERNAME = "${env.DOCKERHUB_USR}"
-                        DOCKER_PASSWORD = "${env.DOCKERHUB_PSW}"
                         PATH = "/home/ubuntu/bin/:${env.PATH}"
                     }
                     steps {
