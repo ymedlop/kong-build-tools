@@ -115,8 +115,13 @@ pipeline {
                         sh 'mkdir -p /home/ubuntu/bin/'
                         sh 'make setup-ci'
                         sh 'git clone --single-branch --branch ${KONG_SOURCE} https://github.com/Kong/kong.git ${KONG_SOURCE_LOCATION}'
-                        sh 'export RESTY_IMAGE_TAG=7 && make package-kong && make test'
-                        sh 'export RESTY_IMAGE_TAG=8 && make package-kong && make test'
+                        sh 'export RESTY_IMAGE_TAG=7 && make package-kong'
+                        sh 'export RESTY_IMAGE_TAG=8 && make package-kong'
+                    }
+                    post {
+                        success {
+                            sh 'export RESTY_IMAGE_TAG=8 && make test'
+                        }
                     }
                 }
                 stage('Centos Builds'){
@@ -134,9 +139,14 @@ pipeline {
                         sh 'mkdir -p /home/ubuntu/bin/'
                         sh 'make setup-ci'
                         sh 'git clone --single-branch --branch ${KONG_SOURCE} https://github.com/Kong/kong.git ${KONG_SOURCE_LOCATION}'
-                        sh 'export RESTY_IMAGE_TAG=8 && make package-kong && make test'
-                        sh 'export RESTY_IMAGE_TAG=7 && make package-kong && make test'
-                        sh 'export RESTY_IMAGE_TAG=6 && make package-kong && make test'
+                        sh 'export RESTY_IMAGE_TAG=8 && make package-kong'
+                        sh 'export RESTY_IMAGE_TAG=7 && make package-kong'
+                        sh 'export RESTY_IMAGE_TAG=6 && make package-kong'
+                    }
+                    post {
+                        success {
+                            sh 'export RESTY_IMAGE_TAG=6 && make test'
+                        }
                     }
                 }
                 stage('Debian Builds'){
@@ -154,10 +164,15 @@ pipeline {
                         sh 'mkdir -p /home/ubuntu/bin/'
                         sh 'make setup-ci'
                         sh 'git clone --single-branch --branch ${KONG_SOURCE} https://github.com/Kong/kong.git ${KONG_SOURCE_LOCATION}'
-                        sh 'export RESTY_IMAGE_TAG=stretch && make package-kong && make test'
-                        sh 'export RESTY_IMAGE_TAG=jessie && make package-kong && make test'
-                        sh 'export RESTY_IMAGE_TAG=buster && make package-kong && make test'
-                        sh 'export RESTY_IMAGE_TAG=bullseye && make package-kong && make test'
+                        sh 'export RESTY_IMAGE_TAG=stretch && make package-kong'
+                        sh 'export RESTY_IMAGE_TAG=jessie && make package-kong'
+                        sh 'export RESTY_IMAGE_TAG=buster && make package-kong'
+                        sh 'export RESTY_IMAGE_TAG=bullseye && make package-kong'
+                    }
+                    post {
+                        success {
+                            sh 'export RESTY_IMAGE_TAG=bullseye && make test'
+                        }
                     }
                 }
                 stage('Ubuntu Builds'){
@@ -165,9 +180,6 @@ pipeline {
                         node {
                             label 'docker-compose'
                         }
-                    }
-                    options {
-                        retry(2)
                     }
                     environment {
                         PACKAGE_TYPE = "deb"
@@ -181,16 +193,19 @@ pipeline {
                         sh 'mkdir -p /home/ubuntu/bin/'
                         sh 'make setup-ci'
                         sh 'git clone --single-branch --branch ${KONG_SOURCE} https://github.com/Kong/kong.git ${KONG_SOURCE_LOCATION}'
-                        sh 'export BUILDX=false RESTY_IMAGE_TAG=bionic && make package-kong && make test'
-                        sh 'export CACHE=false UPDATE_CACHE=true RESTY_IMAGE_TAG=xenial DOCKER_MACHINE_ARM64_NAME="jenkins-kong-"`cat /proc/sys/kernel/random/uuid` && make setup-build && make package-kong && make test'
+                        sh 'export BUILDX=false RESTY_IMAGE_TAG=bionic && make package-kong'
+                        sh 'export CACHE=false UPDATE_CACHE=true RESTY_IMAGE_TAG=xenial DOCKER_MACHINE_ARM64_NAME="jenkins-kong-"`cat /proc/sys/kernel/random/uuid` && make setup-build && make package-kong'
                     }
                     post {
-                        always {
+                        success {
+                            sh 'export RESTY_IMAGE_TAG=bionic && make test'
+                        }
+                        cleanup {
                             sh 'make cleanup-build'
                         }
                     }
                 }
-                stage('Other Releases') {
+                stage('Other Releases'){
                     agent {
                         node {
                             label 'docker-compose'
@@ -203,10 +218,10 @@ pipeline {
                         sh 'mkdir -p /home/ubuntu/bin/'
                         sh 'make setup-ci'
                         sh 'git clone --single-branch --branch ${KONG_SOURCE} https://github.com/Kong/kong.git ${KONG_SOURCE_LOCATION}'
-                        sh 'PACKAGE_TYPE=src RESTY_IMAGE_BASE=src make release'
-                        sh 'PACKAGE_TYPE=apk RESTY_IMAGE_BASE=alpine RESTY_IMAGE_TAG=1 make release'
-                        sh 'PACKAGE_TYPE=rpm RESTY_IMAGE_BASE=amazonlinux RESTY_IMAGE_TAG=1 make release'
-                    }
+                        sh 'PACKAGE_TYPE=src RESTY_IMAGE_BASE=src make package-kong'
+                        sh 'PACKAGE_TYPE=apk RESTY_IMAGE_BASE=alpine RESTY_IMAGE_TAG=1 make package-kong'
+                        sh 'PACKAGE_TYPE=rpm RESTY_IMAGE_BASE=amazonlinux RESTY_IMAGE_TAG=1 make package-kong'
+                    }   
                 }
             }
         }
