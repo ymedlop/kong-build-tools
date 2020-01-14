@@ -3,6 +3,9 @@ pipeline {
     environment {
         KONG_SOURCE = "next"
         KONG_SOURCE_LOCATION = "/tmp/kong"
+        DOCKERHUB = credentials('dockerhub')
+        DOCKER_USERNAME = "${env.DOCKERHUB_USR}"
+        DOCKER_PASSWORD = "${env.DOCKERHUB_PSW}"
     }
     stages {
         stage('Build') {
@@ -197,11 +200,9 @@ pipeline {
                         PATH = "/home/ubuntu/bin/:${env.PATH}"
                     }
                     steps {
-                        sh 'make setup-kong-build-tools'
-                        sh 'mkdir -p $HOME/bin'
-                        sh 'sudo ln -s $HOME/bin/kubectl /usr/local/bin/kubectl'
-                        sh 'sudo ln -s $HOME/bin/kind /usr/local/bin/kind'
-                        dir('../kong-build-tools'){ sh 'make setup-ci' }
+                        sh 'mkdir -p /home/ubuntu/bin/'
+                        sh 'make setup-ci'
+                        sh 'git clone --single-branch --branch ${KONG_SOURCE} https://github.com/Kong/kong.git ${KONG_SOURCE_LOCATION}'
                         sh 'PACKAGE_TYPE=src RESTY_IMAGE_BASE=src make release'
                         sh 'PACKAGE_TYPE=apk RESTY_IMAGE_BASE=alpine RESTY_IMAGE_TAG=1 make release'
                         sh 'PACKAGE_TYPE=rpm RESTY_IMAGE_BASE=amazonlinux RESTY_IMAGE_TAG=1 make release'
